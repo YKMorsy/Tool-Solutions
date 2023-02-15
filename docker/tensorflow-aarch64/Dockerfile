@@ -30,8 +30,7 @@ ENV PY_VERSION="${default_py_version}"
 RUN if ! [ "$(arch)" = "aarch64" ] ; then exit 1; fi
 
 #Install core OS packages
-RUN apt-get -y update && apt-get -y install software-properties-common && add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get -y install accountsservice apport at autoconf automake bc build-essential cmake cpufrequtils curl ethtool gcc-10 g++-10 gettext-base gfortran-10 git iproute2 iputils-ping lxd libbz2-dev libc++-dev libcgal-dev libffi-dev libfreetype6-dev libhdf5-dev libjpeg-dev liblzma-dev libncurses5-dev libncursesw5-dev libpng-dev libreadline-dev libssl-dev libsqlite3-dev libtool libxml2-dev libxslt-dev locales lsb-release lvm2 moreutils net-tools open-iscsi openjdk-8-jdk openssl pciutils policykit-1 python${PY_VERSION} python${PY_VERSION}-dev python${PY_VERSION}-distutils python${PY_VERSION}-venv python3-pip python-openssl rsync rsyslog snapd scons ssh sudo swig time udev unzip ufw uuid-runtime vim wget xz-utils zip zlib1g-dev
-
+RUN apt-get -y update && apt-get -y install software-properties-common && add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get -y install accountsservice apport at autoconf automake bc build-essential cmake cpufrequtils curl ethtool gcc-10 g++-10 gettext-base gfortran-10 git iproute2 iputils-ping lxd libbz2-dev 
 
 # Set default gcc, python and pip versions
 RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 1 && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 1 && update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 1 && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
