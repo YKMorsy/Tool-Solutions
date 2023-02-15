@@ -30,95 +30,17 @@ ENV PY_VERSION="${default_py_version}"
 RUN if ! [ "$(arch)" = "aarch64" ] ; then exit 1; fi
 
 #Install core OS packages
-RUN apt-get -y update && \
-    apt-get -y install software-properties-common && \
-    add-apt-repository ppa:ubuntu-toolchain-r/test && \
-    apt-get -y install \
-      accountsservice \
-      apport \
-      at \
-      autoconf \
-      automake \
-      bc \
-      build-essential \
-      cmake \
-      cpufrequtils \
-      curl \
-      ethtool \
-      gcc-10 \
-      g++-10 \
-      gettext-base \
-      gfortran-10 \
-      git \
-      iproute2 \
-      iputils-ping \
-      lxd \
-      libbz2-dev \
-      libc++-dev \
-      libcgal-dev \
-      libffi-dev \
-      libfreetype6-dev \
-      libhdf5-dev \
-      libjpeg-dev \
-      liblzma-dev \
-      libncurses5-dev \
-      libncursesw5-dev \
-      libpng-dev \
-      libreadline-dev \
-      libssl-dev \
-      libsqlite3-dev \
-      libtool \
-      libxml2-dev \
-      libxslt-dev \
-      locales \
-      lsb-release \
-      lvm2 \
-      moreutils \
-      net-tools \
-      open-iscsi \
-      openjdk-8-jdk \
-      openssl \
-      pciutils \
-      policykit-1 \
-      python${PY_VERSION} \
-      python${PY_VERSION}-dev \
-      python${PY_VERSION}-distutils \
-      python${PY_VERSION}-venv \
-      python3-pip \
-      python-openssl \
-      rsync \
-      rsyslog \
-      snapd \
-      scons \
-      ssh \
-      sudo \
-      swig \
-      time \
-      udev \
-      unzip \
-      ufw \
-      uuid-runtime \
-      vim \
-      wget \
-      xz-utils \
-      zip \
-      zlib1g-dev
+RUN apt-get -y update && apt-get -y install software-properties-common && add-apt-repository ppa:ubuntu-toolchain-r/test && apt-get -y install accountsservice apport at autoconf automake bc build-essential cmake cpufrequtils curl ethtool gcc-10 g++-10 gettext-base gfortran-10 git iproute2 iputils-ping lxd libbz2-dev libc++-dev libcgal-dev libffi-dev libfreetype6-dev libhdf5-dev libjpeg-dev liblzma-dev libncurses5-dev libncursesw5-dev libpng-dev libreadline-dev libssl-dev libsqlite3-dev libtool libxml2-dev libxslt-dev locales lsb-release lvm2 moreutils net-tools open-iscsi openjdk-8-jdk openssl pciutils policykit-1 python${PY_VERSION} python${PY_VERSION}-dev python${PY_VERSION}-distutils python${PY_VERSION}-venv python3-pip python-openssl rsync rsyslog snapd scons ssh sudo swig time udev unzip ufw uuid-runtime vim wget xz-utils zip zlib1g-dev
 
 
 # Set default gcc, python and pip versions
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 1 && \
-    update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 1 && \
-    update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 1 && \
-    update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && \
-    update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 1 && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 1 && update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 1 && update-alternatives --install /usr/bin/python python /usr/bin/python3 1 && update-alternatives --install /usr/bin/pip pip /usr/bin/pip3 1
 
 # DOCKER_USER for the Docker user
 ENV DOCKER_USER=ubuntu
 
 # Setup default user
-RUN useradd --create-home -s /bin/bash -m $DOCKER_USER && echo "$DOCKER_USER:Portland" | chpasswd && adduser $DOCKER_USER sudo
-RUN echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
-RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN useradd --create-home -s /bin/bash -m $DOCKER_USER && echo "$DOCKER_USER:Portland" | chpasswd && adduser $DOCKER_USER sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Import profile for bash
 COPY bash_profile /home/$DOCKER_USER/.bash_profile
@@ -152,8 +74,7 @@ ENV PROD_DIR=/opt \
 
 # Make directories to hold package source & build directories (PACKAGE_DIR)
 # and install build directories (PROD_DIR).
-RUN mkdir -p $PACKAGE_DIR && \
-    mkdir -p $PROD_DIR
+RUN mkdir -p $PACKAGE_DIR && mkdir -p $PROD_DIR
 
 # Common compiler settings
 ENV CC=gcc \
@@ -210,8 +131,7 @@ RUN curl https://sh.rustup.rs -sSf | sh -s -- -y
 ENV PATH="/home/$DOCKER_USER/.cargo/bin:${PATH}"
 
 # Install some basic python packages
-RUN pip install --no-cache-dir --upgrade pip
-RUN pip install --no-cache-dir "setuptools>=41.0.0" six mock wheel cython sh
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir "setuptools>=41.0.0" six mock wheel cython sh
 
 # Build numpy from source, using OpenBLAS for BLAS calls
 COPY scripts/build-numpy.sh $PACKAGE_DIR/.
@@ -232,11 +152,7 @@ RUN $PACKAGE_DIR/build-scipy.sh
 # Note: tensorflow-io v0.27.0 is specified as later releases are unable to
 # load `libtensorflow_io_plugins.so` on AArch64.
 # TODO: update to tensorflow-io once the issue is resolved in the released wheel.
-RUN pip uninstall enum34 -y
-RUN HDF5_DIR=/usr/lib/aarch64-linux-gnu/hdf5/serial pip install h5py==3.1.0
-RUN pip install --no-cache-dir grpcio tensorflow-io==0.27.0 pytest
-RUN pip install --no-cache-dir ck==1.55.5 absl-py pycocotools pillow==8.2.0
-RUN pip install --no-cache-dir transformers pandas
+RUN pip uninstall enum34 -y && HDF5_DIR=/usr/lib/aarch64-linux-gnu/hdf5/serial pip install h5py==3.1.0 && pip install --no-cache-dir grpcio tensorflow-io==0.27.0 pytest && pip install --no-cache-dir ck==1.55.5 absl-py pycocotools pillow==8.2.0 && pip install --no-cache-dir transformers pandas
 
 # Install OpenCV into our venv (needed for MLCommons benchmarks)
 RUN pip install --no-cache-dir opencv-python-headless
@@ -292,11 +208,7 @@ COPY --chown=$DOCKER_USER:$DOCKER_USER --from=tensorflow-tools $VIRTUAL_ENV /hom
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Get Bazel binary for AArch64 using the latest Bazelisk release
-RUN mkdir -p $PACKAGE_DIR/bazel
-RUN bazelisk_url=$(curl -L -s https://api.github.com/repos/bazelbuild/bazelisk/releases/latest \
-    | grep -o -E "https://(.*)bazelisk-linux-arm64") && \
-    wget $bazelisk_url -O $PACKAGE_DIR/bazel/bazel
-RUN chmod a+x $PACKAGE_DIR/bazel/bazel
+RUN mkdir -p $PACKAGE_DIR/bazel && bazelisk_url=$(curl -L -s https://api.github.com/repos/bazelbuild/bazelisk/releases/latest | grep -o -E "https://(.*)bazelisk-linux-arm64") && wget $bazelisk_url -O $PACKAGE_DIR/bazel/bazel && chmod a+x $PACKAGE_DIR/bazel/bazel
 ENV PATH="$PACKAGE_DIR/bazel:$PATH"
 
 # Build TensorFlow
@@ -362,11 +274,7 @@ COPY --chown=$DOCKER_USER:$DOCKER_USER --from=tensorflow-tools $VIRTUAL_ENV /hom
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Get Bazel binary for AArch64 using the latest Bazelisk release
-RUN mkdir -p $PACKAGE_DIR/bazel
-RUN bazelisk_url=$(curl -L -s https://api.github.com/repos/bazelbuild/bazelisk/releases/latest \
-    | grep -o -E "https://(.*)bazelisk-linux-arm64") && \
-    wget $bazelisk_url -O $PACKAGE_DIR/bazel/bazel
-RUN chmod a+x $PACKAGE_DIR/bazel/bazel
+RUN mkdir -p $PACKAGE_DIR/bazel && bazelisk_url=$(curl -L -s https://api.github.com/repos/bazelbuild/bazelisk/releases/latest | grep -o -E "https://(.*)bazelisk-linux-arm64") && wget $bazelisk_url -O $PACKAGE_DIR/bazel/bazel && chmod a+x $PACKAGE_DIR/bazel/bazel
 ENV PATH="$PACKAGE_DIR/bazel:$PATH"
 
 # Build TensorFlow Serving
@@ -399,19 +307,16 @@ ENV LD_LIBRARY_PATH=$VIRTUAL_ENV/tensorflow/lib:$LD_LIBRARY_PATH
 # in $EXAMPLE_DIR.
 ENV EXAMPLE_DIR=/home/$DOCKER_USER/examples
 ENV MLCOMMONS_DIR=$EXAMPLE_DIR/MLCommons
-RUN mkdir -p $EXAMPLE_DIR
-RUN mkdir -p $MLCOMMONS_DIR
+RUN mkdir -p $EXAMPLE_DIR && mkdir -p $MLCOMMONS_DIR
 
 # Clone and install MLCommons (MLPerf)
 COPY patches/optional-mlcommons-changes.patch $MLCOMMONS_DIR/optional-mlcommons-changes.patch
 COPY patches/mlcommons_bert.patch $MLCOMMONS_DIR/mlcommons_bert.patch
 COPY scripts/build-mlcommons.sh $MLCOMMONS_DIR/.
-RUN $MLCOMMONS_DIR/build-mlcommons.sh
-RUN rm -f $MLCOMMONS_DIR/build-mlcommons.sh
+RUN $MLCOMMONS_DIR/build-mlcommons.sh && rm -f $MLCOMMONS_DIR/build-mlcommons.sh
 
 # Install missing Python package dependencies required to run examples
-RUN pip install --no-cache-dir pyyaml
-RUN pip install --no-cache-dir tqdm
+RUN pip install --no-cache-dir pyyaml && pip install --no-cache-dir tqdm
 
 # MLCommons ServerMode
 COPY patches/Makefile.patch $MLCOMMONS_DIR/.
