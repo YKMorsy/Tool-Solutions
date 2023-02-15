@@ -23,7 +23,7 @@ ARG njobs
 ARG bazel_mem
 ARG default_py_version=3.8
 
-FROM ubuntu:20.04 AS tensorflow-base
+FROM ubuntu:18.04 AS tensorflow-base
 ARG default_py_version
 ENV PY_VERSION="${default_py_version}"
 
