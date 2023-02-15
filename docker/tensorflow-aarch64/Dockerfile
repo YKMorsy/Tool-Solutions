@@ -39,9 +39,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 1 && update-a
 ENV DOCKER_USER=odroid
 
 # Setup default user
-RUN useradd --create-home -s /bin/bash -m $
-
-&& echo "$DOCKER_USER:Portland" | chpasswd && adduser $DOCKER_USER sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+RUN useradd --create-home -s /bin/bash -m $DOCKER_USER && echo "$DOCKER_USER:Portland" | chpasswd && adduser $DOCKER_USER sudo && echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers && echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
 
 # Import profile for bash
 COPY bash_profile /home/$DOCKER_USER/.bash_profile
